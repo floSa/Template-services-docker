@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres/Iris.csv:/docker-entrypoint-initdb.d/Iris.csv         # <-- ajout ici
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb_db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    env_file:
+      - .env
+    ports:
+      - "${MONGO_PORT}:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama_server
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST}
+      - OLLAMA_ORIGINS=${OLLAMA_ORIGINS}
+      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE}
+      - OLLAMA_DEBUG=${OLLAMA_DEBUG}
+    env_file:
+      - .env
+    ports:
+      - "${OLLAMA_PORT}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./ollama/init-model.sh:/init-model.sh
+    networks:
+      - app-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+    command: >
+      sh -c "
+        ollama serve &
+        sleep 10 &&
+        ollama pull phi4-mini:latest &&
+        wait
+      "
+
+
+  miniconda:
+    build:
+      context: ./python
+      dockerfile: Dockerfile
+    container_name: miniconda_app
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./python/src:/app/src
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    command: ["bash", "/app/entrypoint.sh"]
+
+  streamlit:
+    build:
+      context: ./streamlit
+      dockerfile: Dockerfile
+    container_name: streamlit_app
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${STREAMLIT_PORT}:8501"
+    volumes:
+      - ./streamlit/src:/app/src
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    command: ["bash", "/app/entrypoint.sh"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  ollama_data:
+
+networks:
+  app-network:
+    driver: bridge

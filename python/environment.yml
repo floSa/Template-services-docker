@@ -1,0 +1,16 @@
+# python/environment.yml
+name: mon_env_test
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pandas>=2.0.0
+  - sqlalchemy>=2.0.0
+  - psycopg2
+  - python-dotenv
+  - pymongo>=4.2.0
+  - pip
+  - pip:
+      # si vous avez des paquets pip non présents dans conda
+      # - nom-paquet-pip>=version
