@@ -4,6 +4,11 @@ import streamlit as st
 import pymongo
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
+import requests
+import json
+
+
+# Accès au service streamlit à l'adresse http://localhost:8501/ 
 
 # Chargement des variables d'environnement
 load_dotenv()
@@ -15,14 +20,14 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🧠 Application de test Streamlit avec PostgreSQL et MongoDB")
+st.title("🧠 Application de test Streamlit avec PostgreSQL, MongoDB et Ollama")
 st.markdown("---")
 
 # Sidebar
 st.sidebar.title("Navigation")
 option = st.sidebar.selectbox(
     "Choisissez une section:",
-    ["Accueil", "PostgreSQL", "MongoDB"]
+    ["Accueil", "PostgreSQL", "MongoDB", "Ollama"]
 )
 
 if option == "Accueil":
@@ -139,6 +144,48 @@ elif option == "MongoDB":
     except Exception as e:
         st.error(f"❌ Erreur MongoDB : {e}")
 
+elif option == "Ollama":
+    st.subheader("🧠 Ollama : Chat avec un modèle")
+
+    base_url = os.getenv("OLLAMA_URL", "http://ollama:11434")
+
+    # Étape 1 : Charger la liste des modèles disponibles
+    try:
+        tags_response = requests.get(f"{base_url}/api/tags")
+        tags_response.raise_for_status()
+        models = tags_response.json().get("models", [])
+        model_names = [model["name"] for model in models]
+
+        if not model_names:
+            st.warning("⚠️ Aucun modèle Ollama disponible.")
+        else:
+            # Étape 2 : Choisir un modèle
+            selected_model = st.selectbox("🧠 Choisissez un modèle Ollama :", model_names)
+
+            # Étape 3 : Interface de chatbot
+            st.markdown("### 💬 Chatbot")
+            default_prompt = "Peux-tu te présenter ?"
+            user_input = st.text_area("🗨️ Votre question :", value=default_prompt, height=100)
+
+            if st.button("Envoyer la requête au modèle"):
+                with st.spinner("Réponse en cours..."):
+                    try:
+                        chat_payload = {
+                                        "model": selected_model,
+                                        "prompt": user_input,
+                                        "stream": False  # 🔧 Ajouter cette ligne
+                                    }
+                        chat_response = requests.post(f"{base_url}/api/generate", json=chat_payload)
+                        chat_response.raise_for_status()
+                        answer = chat_response.json().get("response", "❌ Aucune réponse.")
+                        st.success("✅ Réponse du modèle :")
+                        st.write(answer)
+                    except Exception as e:
+                        st.error(f"❌ Erreur lors de la génération : {e}")
+    except Exception as e:
+        st.error(f"❌ Erreur de connexion à Ollama : {e}")
+
+
 # Footer
 st.markdown("---")
-st.markdown("📦 Application Streamlit avec PostgreSQL & MongoDB - version dockerisée.")
+st.markdown("📦 Application Streamlit avec PostgreSQL, MongoDB, Ollama - version dockerisée.")

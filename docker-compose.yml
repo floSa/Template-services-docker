@@ -16,7 +16,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./postgres/Iris.csv:/docker-entrypoint-initdb.d/Iris.csv         # <-- ajout ici
+      - ./postgres/Iris.csv:/docker-entrypoint-initdb.d/Iris.csv
     networks:
       - app-network
     healthcheck:
@@ -50,22 +50,13 @@ services:
 
   ollama:
     image: ollama/ollama:latest
-    container_name: ollama_server
+    container_name: ollama-server
     restart: unless-stopped
     environment:
-      - OLLAMA_HOST=${OLLAMA_HOST}
+      - OLLAMA_HOST=0.0.0.0:11434
       - OLLAMA_ORIGINS=${OLLAMA_ORIGINS}
       - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE}
       - OLLAMA_DEBUG=${OLLAMA_DEBUG}
-    env_file:
-      - .env
-    ports:
-      - "${OLLAMA_PORT}:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-      - ./ollama/init-model.sh:/init-model.sh
-    networks:
-      - app-network
     deploy:
       resources:
         reservations:
@@ -73,20 +64,20 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+    ports:
+      - "${OLLAMA_PORT}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./ollama/entrypoint.sh:/entrypoint.sh:ro
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "ollama", "list"]
       interval: 30s
-      timeout: 15s
+      timeout: 10s
       retries: 5
       start_period: 60s
-    command: >
-      sh -c "
-        ollama serve &
-        sleep 10 &&
-        ollama pull phi4-mini:latest &&
-        wait
-      "
-
+    entrypoint: ["sh", "/entrypoint.sh"]
 
   miniconda:
     build:
@@ -101,6 +92,8 @@ services:
     networks:
       - app-network
     depends_on:
+      ollama:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       mongodb:
@@ -122,6 +115,8 @@ services:
     networks:
       - app-network
     depends_on:
+      ollama:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       mongodb:
