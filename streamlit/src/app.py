@@ -6,6 +6,8 @@ from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 import requests
 import json
+from minio import Minio
+import io
 
 
 # Accès au service streamlit à l'adresse http://localhost:8501/ 
@@ -27,7 +29,7 @@ st.markdown("---")
 st.sidebar.title("Navigation")
 option = st.sidebar.selectbox(
     "Choisissez une section:",
-    ["Accueil", "PostgreSQL", "MongoDB", "Ollama"]
+    ["Accueil", "PostgreSQL", "MongoDB", "Ollama", "Minio"]
 )
 
 if option == "Accueil":
@@ -184,6 +186,67 @@ elif option == "Ollama":
                         st.error(f"❌ Erreur lors de la génération : {e}")
     except Exception as e:
         st.error(f"❌ Erreur de connexion à Ollama : {e}")
+
+elif option == "Minio":
+    st.subheader("📦 MinIO : Gestion des images")
+
+    # Initialisation du client MinIO
+    minio_host = os.getenv("MINIO_HOST", "minio")
+    minio_port = os.getenv("MINIO_PORT", "9000")
+    access_key = os.getenv("MINIO_ROOT_USER")
+    secret_key = os.getenv("MINIO_ROOT_PASSWORD")
+    bucket = os.getenv("MINIO_BUCKET_NAME")
+
+    client = Minio(
+        f"{minio_host}:{minio_port}",
+        access_key=access_key,
+        secret_key=secret_key,
+        secure=False
+    )
+
+    st.markdown("### 🖼️ Afficher les 3 dernières images du bucket")
+    if st.button("🔄 Charger les images"):
+        try:
+            objs = client.list_objects(bucket, recursive=True)
+            derniers = sorted(objs, key=lambda o: o.last_modified, reverse=True)[:3]
+            if derniers:
+                cols = st.columns(3)
+                for col, obj in zip(cols, derniers):
+                    # Récupérer l'objet en mémoire
+                    response = client.get_object(bucket, obj.object_name)
+                    image_data = response.read()
+                    response.close()
+                    response.release_conn()
+                    # Afficher
+                    col.image(
+                        io.BytesIO(image_data),
+                        caption=obj.object_name,
+                        use_column_width=True
+                    )
+            else:
+                st.info("Aucune image dans le bucket.")
+        except Exception as e:
+            st.error(f"Erreur lecture bucket MinIO : {e}")
+
+    st.markdown("---")
+    st.markdown("### ➕ Charger une nouvelle image")
+    uploaded = st.file_uploader(
+        "Sélectionnez une image à uploader",
+        type=["png", "jpg", "jpeg"]
+    )
+    if uploaded and st.button("📤 Envoyer vers MinIO"):
+        try:
+            client.put_object(
+                bucket_name=bucket,
+                object_name=uploaded.name,
+                data=uploaded,
+                length=uploaded.size,
+                content_type=uploaded.type
+            )
+            st.success(f"Image « {uploaded.name} » uploadée !")
+        except Exception as e:
+            st.error(f"Erreur upload MinIO : {e}")
+
 
 
 # Footer
