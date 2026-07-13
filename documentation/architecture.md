@@ -156,10 +156,10 @@ principaux :
 
 | Aspect | État |
 |---|---|
-| Secrets | ⚠️ Centralisés dans `.env`, mais ce fichier est présent dans le dépôt (voir SECURITY.md) |
+| Secrets | Centralisés dans `.env`, mais ce fichier est présent dans le dépôt (voir SECURITY.md) |
 | Isolation réseau | Réseau `app-network` dédié ; seuls les ports utiles sont publiés sur l'hôte |
-| Identifiants par défaut | ⚠️ `minioadmin`/`minioadmin`, `admin`/`your_secure_password`, `myuser`/`mypassword` — à changer |
-| Ollama CORS | ⚠️ `OLLAMA_ORIGINS=*` (toutes origines autorisées) |
+| Identifiants par défaut | `minioadmin`/`minioadmin`, `admin`/`your_secure_password`, `myuser`/`mypassword` — à changer |
+| Ollama CORS | `OLLAMA_ORIGINS=*` (toutes origines autorisées) |
 
 ---
 

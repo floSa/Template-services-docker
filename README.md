@@ -1,9 +1,14 @@
-# Template-services-docker 🐳
+# Template-services-docker
 
 **Squelette Docker Compose regroupant des services centralisés réutilisables — deux bases
 de données (PostgreSQL, MongoDB), un LLM local (Ollama/GPU), un stockage objet S3 (MinIO),
 un conteneur de calcul Python/Miniconda et une interface Streamlit — préamorcés avec le
 jeu de données Iris.**
+
+![Python](https://img.shields.io/badge/Python-3.11_%7C_3.12-3776AB?logo=python&logoColor=white)
+![conda](https://img.shields.io/badge/conda-miniconda3-44A833?logo=anaconda&logoColor=white)
+![Docker Compose](https://img.shields.io/badge/Docker_Compose-3.8-2496ED?logo=docker&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.28.2-FF4B4B?logo=streamlit&logoColor=white)
 
 > Note d'origine : « ici on trouve quelques services centralisés comme BDDs, python
 > miniconda, env cuda etc. » — ce dépôt sert de base à cloner pour démarrer un projet
@@ -71,7 +76,7 @@ docker compose up -d --build
 | PostgreSQL | localhost:5432 | Client SQL |
 | MongoDB | localhost:27017 | Client Mongo |
 
-> ⚠️ `.env` est actuellement versionné avec des mots de passe et il n'y a pas de
+> Attention : `.env` est actuellement versionné avec des mots de passe et il n'y a pas de
 > `.env.example`. Voir [SECURITY.md](documentation/SECURITY.md).
 
 ## Configuration
@@ -116,7 +121,7 @@ docker compose logs -f miniconda
 ```text
 Template-services-docker/
 ├── docker-compose.yml        # orchestration des 7 services
-├── .env                      # variables & secrets (⚠️ versionné)
+├── .env                      # variables & secrets (versionné — voir SECURITY.md)
 ├── LICENSE                   # GPL-3.0
 ├── postgres/                 # init.sql + Iris.csv
 ├── mongo/                    # mongo-init.sh + Iris.csv

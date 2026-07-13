@@ -16,7 +16,7 @@ par Docker Compose (`env_file: .env`) et par les apps (`python-dotenv`).
 | `MINIO_ROOT_PASSWORD` | `.env` | `minioadmin` | manuelle |
 | `MINIO_ROOT_USER` | `.env` | `minioadmin` | manuelle |
 
-> ⚠️ **`.env` est présent dans le dépôt** et contient des mots de passe. Un `.env` avec
+> **Important : `.env` est présent dans le dépôt** et contient des mots de passe. Un `.env` avec
 > secrets ne doit jamais être committé. Il n'existe pas de `.env.example`.
 > Recommandation : ajouter `.env` au `.gitignore`, committer à la place un `.env.example`
 > sans valeurs sensibles, et faire tourner les mots de passe déjà exposés.
@@ -36,7 +36,7 @@ service. Ports publiés sur l'hôte :
 | `miniconda` | non | — | Conteneur de calcul interne |
 | `mc-client-init` | non | — | Job d'init éphémère |
 
-> ⚠️ En démo locale ces ports sont pratiques ; sur une machine exposée, restreindre les
+> Attention : en démo locale ces ports sont pratiques ; sur une machine exposée, restreindre les
 > publications (`127.0.0.1:<port>:...`) ou ne pas publier les BDD.
 
 ## Dépendances
@@ -67,11 +67,11 @@ pip-audit -r streamlit/requirements.txt
 
 ## Risques connus (non traités)
 
-- ⚠️ **`.env` versionné avec secrets** — à retirer du dépôt et ajouter au `.gitignore`.
-- ⚠️ **Identifiants par défaut** (`minioadmin`, `admin`/`your_secure_password`,
+- **`.env` versionné avec secrets** — à retirer du dépôt et ajouter au `.gitignore`.
+- **Identifiants par défaut** (`minioadmin`, `admin`/`your_secure_password`,
   `myuser`/`mypassword`) — à changer avant tout usage non-local.
-- ⚠️ **`OLLAMA_ORIGINS=*`** — restreindre aux origines légitimes hors démo.
-- ⚠️ **Ports BDD publiés sur l'hôte** — limiter à `127.0.0.1` ou supprimer la publication
+- **`OLLAMA_ORIGINS=*`** — restreindre aux origines légitimes hors démo.
+- **Ports BDD publiés sur l'hôte** — limiter à `127.0.0.1` ou supprimer la publication
   en environnement partagé.
-- ⚠️ **Conteneurs en root** — définir un utilisateur non-root pour les images applicatives.
-- ⚠️ **Tags `latest`** — épingler pour éviter des mises à jour non maîtrisées.
+- **Conteneurs en root** — définir un utilisateur non-root pour les images applicatives.
+- **Tags `latest`** — épingler pour éviter des mises à jour non maîtrisées.

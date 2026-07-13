@@ -1,6 +1,6 @@
 # streamlit
 
-## 📌 Présentation du Service
+## Présentation du service
 Interface web de **test et démonstration** des autres services. C'est la seule façade
 visible par l'utilisateur : elle regroupe, dans une même application, un accès à
 PostgreSQL, MongoDB, Ollama et MinIO via une barre latérale de navigation.
@@ -10,13 +10,13 @@ depuis le navigateur, on insère et affiche des lignes Iris dans chaque base, on
 avec le LLM local, et on parcourt/téléverse des images dans le stockage objet — sans
 écrire une ligne de code.
 
-## 🔗 Accès au service
+## Accès au service
 - URL : `http://localhost:8501` (port `${STREAMLIT_PORT}` = `8501`).
 - Image construite depuis `streamlit/Dockerfile` (`python:3.12-slim`).
 - Container : `streamlit_app`.
 - Sonde : `GET /healthz`.
 
-## 🗂️ Structure et définition des données
+## Structure et définition des données
 Code : `streamlit/src/app.py`. Sections (barre latérale) :
 
 | Section | Ce qu'elle fait | Service ciblé |
@@ -31,7 +31,7 @@ Variables d'environnement utilisées (via `.env`) : `DATABASE_URL` /
 `POSTGRES_*`, `MONGO_*`, `OLLAMA_URL` (défaut `http://ollama:11434`),
 `MINIO_HOST`/`MINIO_PORT`/`MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`/`MINIO_BUCKET_NAME`.
 
-## 💻 Commandes Utiles
+## Commandes utiles
 ```bash
 docker compose up -d --build streamlit
 docker compose logs -f streamlit
@@ -41,7 +41,7 @@ docker compose build streamlit
 Le code est monté à chaud (`./streamlit/src:/app/src`) : une modification de `app.py` est
 prise en compte au rechargement Streamlit sans rebuild.
 
-## 🛠️ Problèmes rencontrés et Solutions
+## Problèmes rencontrés et solutions
 - **Problème** : la section MinIO utilise `use_column_width` (`app.py:224`).
   **Cause** : paramètre déprécié dans les versions récentes de Streamlit.
   **Solution** : ce n'est pas bloquant avec `streamlit==1.28.2` (version épinglée) ; à

@@ -26,8 +26,8 @@ Commande : `server /data --console-address ":9001"`.
 | `MINIO_PORT` | Port API publié sur l'hôte | `9000` |
 | `MINIO_BUCKET_NAME` | Bucket cible (utilisé par `mc-client-init`) | `my-bucket` |
 
-> ⚠️ Le port console `9001` est publié en dur (`docker-compose.yml:137`), non paramétré.
-> ⚠️ La ligne `MINIO_PORT=9000` apparaît deux fois dans `.env` (doublon sans effet).
+> Le port console `9001` est publié en dur (`docker-compose.yml:137`), non paramétré.
+> La ligne `MINIO_PORT=9000` apparaît deux fois dans `.env` (doublon sans effet).
 
 ## Dépendances
 Aucune dépendance amont. Dépendant : `mc-client-init` attend son healthcheck.

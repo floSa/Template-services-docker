@@ -22,8 +22,9 @@ qui est persisté, où, et comment c'est initialisé.
 - **Initialisation** (premier démarrage, volume vide) : `postgres/init.sql` crée la table
   `iris` puis `COPY` depuis `postgres/Iris.csv` (`150` lignes).
 - **Schéma** : voir [services/postgres.md](services/postgres.md).
-- ⚠️ Les scripts `/docker-entrypoint-initdb.d/` ne s'exécutent **qu'au premier boot** (BDD
-  vide). Pour rejouer l'init : `docker compose down -v` puis `up` (détruit les données).
+- **Attention** : les scripts `/docker-entrypoint-initdb.d/` ne s'exécutent **qu'au premier
+  boot** (BDD vide). Pour rejouer l'init : `docker compose down -v` puis `up` (détruit les
+  données).
 
 ## 3. MongoDB
 
@@ -42,7 +43,7 @@ qui est persisté, où, et comment c'est initialisé.
 - **Initialisation applicative** : le job `mc-client-init` (re)crée le bucket
   `${MINIO_BUCKET_NAME}` et y copie `minio/images/`. Voir
   [services/mc-client-init.md](services/mc-client-init.md).
-- ⚠️ Committer `minio/data/` versionne des fichiers internes MinIO (métadonnées
+- **Attention** : committer `minio/data/` versionne des fichiers internes MinIO (métadonnées
   `xl.meta`) — à envisager d'ajouter au `.gitignore`.
 
 ## 5. Ollama (modèles)
